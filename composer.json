@@ -1,0 +1,49 @@
+{
+    "name": "aabosham/laravel-favorite",
+    "description": "Create favorite for any models for laravel framework",
+    "keywords": [
+        "aabosham",
+        "laravel",
+        "favorite"
+    ],
+    "homepage": "https://github.com/aabosham/laravel-favorite",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Abobaker",
+            "email": "albaakr@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.2|^8.0",
+        "illuminate/support": "^6.0|^7.0|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Aabosham\\Favoritable\\": "src"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aabosham\\Favoritable\\FavoritableServiceProvider"
+            ],
+            "aliases": {
+                "Favoritable": "Aabosham\\Favoritable\\FavoritableFacade"
+            }
+        }
+    }
+}
