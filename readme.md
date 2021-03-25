@@ -7,7 +7,7 @@ Favoritable is a package for Laravel.
 From the command line, run:
 
 ```
-composer require aabosham/favoritable
+composer require aabosham/favorite
 ```
 
 ```
