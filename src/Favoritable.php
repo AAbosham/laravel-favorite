@@ -31,7 +31,7 @@ trait Favoritable
         return (string) $count_string;
     }
 
-    public function scopeFavoritedBy($query, User $user)
+    public function scopeFavoritedBy($query, $user)
     {
         return $query->whereHas('favorites', function ($query) use ($user) {
             $query->where('user_id', $user->id)
@@ -57,7 +57,7 @@ trait Favoritable
             ->exists();
     }
 
-    public function scopeAlarmedBy($query, User $user)
+    public function scopeAlarmedBy($query, $user)
     {
         return $query->whereHas('favorites', function ($query) use ($user) {
             $query->where('user_id', $user->id)
