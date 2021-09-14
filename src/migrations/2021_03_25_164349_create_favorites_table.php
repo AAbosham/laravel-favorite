@@ -19,15 +19,17 @@ class CreateFavoritesTable extends Migration
                 $table->uuid('uuid');
                 $table->unsignedBigInteger('user_id')->index();
                 $table->morphs('favoritable');
+                $table->tinyInteger('alarm')
+                    ->default(0);
                 $table->tinyInteger('isdeleted')
                     ->default(0);
                 $table->unsignedBigInteger('deleted_by')
                     ->nullable();
                 $table->dateTime('deleted_at')
                     ->nullable();
-                
+
                 $table->index([
-                    'favoritable_id', 
+                    'favoritable_id',
                     'favoritable_type'
                 ], 'favorite_favoritable_id_favoritable_type_index');
                 $table->timestamps();

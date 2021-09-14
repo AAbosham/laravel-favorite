@@ -11,10 +11,31 @@ trait Favoritable
         return $this->morphMany(Favorite::class, 'favoritable');
     }
 
+    public function totalFavoritesCount(): string
+    {
+        return $this->favorites()->where('isdeleted',0)->count();
+    }
+
+    public function totalFavoritesCountDigital(): string
+    {
+        $count = $this->totalFavoritesCount();
+
+        if($count > (1000 * 1000)){
+            $count_string = ($count / (1000 * 1000)).'M';
+        } else if($count > 1000){
+            $count_string = ($count / 1000).'K';
+        } else {
+            $count_string = $count;
+        }
+
+        return (string) $count_string;
+    }
+
     public function scopeFavoritedBy($query, User $user)
     {
         return $query->whereHas('favorites', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
+            $query->where('user_id', $user->id)
+                ->where('isdeleted', 0);
         });
     }
 
@@ -32,6 +53,34 @@ trait Favoritable
 
         return $this->favorites()
             ->where('user_id', $user->id)
+            ->where('isdeleted',0)
+            ->exists();
+    }
+
+    public function scopeAlarmedBy($query, User $user)
+    {
+        return $query->whereHas('favorites', function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->where('alarm', 1)
+                ->where('isdeleted', 0);
+        });
+    }
+
+    public function isAlarmedBy($user = null)
+    {
+        if($user == null){
+            if (auth()->check()) {
+                $user = auth()->user();
+            } else {
+                return false;
+            }
+        }
+
+        $user = auth()->user();
+
+        return $this->favorites()
+            ->where('user_id', $user->id)
+            ->where('alarm', 1)
             ->where('isdeleted',0)
             ->exists();
     }
@@ -62,7 +111,7 @@ trait Favoritable
             $favorite_save = $this->favorites()->save($favorite);
 
             if(!$favorite_save){
-                return false;  
+                return false;
             }
 
             return true;
@@ -94,12 +143,10 @@ trait Favoritable
                 ->where('favoritable_id', '=', $this->id)
                 ->update([
                     'isdeleted' => 1,
-                    'deleted_at' => \Carbon\Carbon::now(),
+                    'deleted_at' => now(),
                     'deleted_by' => $user->id,
                 ]);
 
-            info('$unfavorite ');
-            info($unfavorite );
 
             if(!$unfavorite){
                 return false;
