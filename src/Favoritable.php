@@ -158,6 +158,82 @@ trait Favoritable
         return true;
     }
 
+    public function alarm($user = null)
+    {
+        if($user == null){
+            if (auth()->check()) {
+                $user = auth()->user();
+            } else {
+                return false;
+            }
+        }
+
+        $user = auth()->user();
+
+        if ($this->favorites()
+            ->where('user_id', $user->id)
+            ->where('isdeleted',0)
+            ->exists()) {
+
+            $this->favorites()->update([
+                'alarm' => 1
+            ]);
+
+            return true;
+        } else {
+            $favorite = new Favorite();
+            $favorite->uuid = \DB::raw('UUID()');
+            $favorite->user_id = $user->id;
+            $favorite->alarm = 1;
+
+            $favorite_save = $this->favorites()->save($favorite);
+
+            if(!$favorite_save){
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function unalarm($user = null)
+    {
+        if($user == null){
+            if (auth()->check()) {
+                $user = auth()->user();
+            } else {
+                return false;
+            }
+        }
+
+        $user = auth()->user();
+
+        if ($this->favorites()
+            ->where('user_id', $user->id)
+            ->where('isdeleted', 0)
+            ->exists()) {
+
+            $unfavorite = $this->favorites()
+                ->where('user_id', $user->id)
+                ->where('isdeleted',0)
+                ->where('favoritable_id',$this->id)
+                ->update([
+                    'alarm' => 0,
+                ]);
+
+
+            if(!$unfavorite){
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+
     public function favoritesCount()
     {
         return $this->favorites()->count();
