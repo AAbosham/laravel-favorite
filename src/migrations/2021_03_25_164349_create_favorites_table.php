@@ -15,18 +15,14 @@ class CreateFavoritesTable extends Migration
     {
         if (!Schema::hasTable('favorites')) {
             Schema::create('favorites', function (Blueprint $table) {
-                $table->id();
-                $table->uuid('uuid');
-                $table->unsignedBigInteger('user_id')->index();
-                $table->morphs('favoritable');
+                $table->uuid('id')->primary();
+                $table->foreignUuid('user_id')->index();
+                $table->uuidMorphs('favoritable');
                 $table->tinyInteger('alarm')
                     ->default(0);
-                $table->tinyInteger('isdeleted')
-                    ->default(0);
-                $table->unsignedBigInteger('deleted_by')
+                $table->foreignUuid('deleted_by')
                     ->nullable();
-                $table->dateTime('deleted_at')
-                    ->nullable();
+                $table->softDeletes('deleted_at');
 
                 $table->index([
                     'favoritable_id',

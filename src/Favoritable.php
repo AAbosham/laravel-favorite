@@ -13,17 +13,17 @@ trait Favoritable
 
     public function totalFavoritesCount(): string
     {
-        return $this->favorites()->where('isdeleted',0)->count();
+        return $this->favorites()->count();
     }
 
     public function totalFavoritesCountDigital(): string
     {
         $count = $this->totalFavoritesCount();
 
-        if($count > (1000 * 1000)){
-            $count_string = ($count / (1000 * 1000)).'M';
-        } else if($count > 1000){
-            $count_string = ($count / 1000).'K';
+        if ($count > (1000 * 1000)) {
+            $count_string = ($count / (1000 * 1000)) . 'M';
+        } else if ($count > 1000) {
+            $count_string = ($count / 1000) . 'K';
         } else {
             $count_string = $count;
         }
@@ -34,14 +34,18 @@ trait Favoritable
     public function scopeFavoritedBy($query, $user)
     {
         return $query->whereHas('favorites', function ($query) use ($user) {
-            $query->where('user_id', $user->id)
-                ->where('isdeleted', 0);
+            $query->where('user_id', $user->id);
         });
+    }
+
+    public function isFavorited($user = null)
+    {
+        return $this->isFavoritedBy($user);
     }
 
     public function isFavoritedBy($user = null)
     {
-        if($user == null){
+        if ($user == null) {
             if (auth()->check()) {
                 $user = auth()->user();
             } else {
@@ -53,7 +57,6 @@ trait Favoritable
 
         return $this->favorites()
             ->where('user_id', $user->id)
-            ->where('isdeleted',0)
             ->exists();
     }
 
@@ -61,14 +64,13 @@ trait Favoritable
     {
         return $query->whereHas('favorites', function ($query) use ($user) {
             $query->where('user_id', $user->id)
-                ->where('alarm', 1)
-                ->where('isdeleted', 0);
+                ->where('alarm', 1);
         });
     }
 
     public function isAlarmedBy($user = null)
     {
-        if($user == null){
+        if ($user == null) {
             if (auth()->check()) {
                 $user = auth()->user();
             } else {
@@ -81,13 +83,13 @@ trait Favoritable
         return $this->favorites()
             ->where('user_id', $user->id)
             ->where('alarm', 1)
-            ->where('isdeleted',0)
+
             ->exists();
     }
 
     public function favorite($user = null)
     {
-        if($user == null){
+        if ($user == null) {
             if (auth()->check()) {
                 $user = auth()->user();
             } else {
@@ -99,30 +101,28 @@ trait Favoritable
 
         if ($this->favorites()
             ->where('user_id', $user->id)
-            ->where('isdeleted',0)
-            ->exists()) {
+
+            ->exists()
+        ) {
 
             return true;
         } else {
             $favorite = new Favorite();
-            $favorite->uuid = \DB::raw('UUID()');
             $favorite->user_id = $user->id;
 
             $favorite_save = $this->favorites()->save($favorite);
 
-            if(!$favorite_save){
+            if (!$favorite_save) {
                 return false;
             }
 
             return true;
         }
-
-        return false;
     }
 
     public function unfavorite($user = null)
     {
-        if($user == null){
+        if ($user == null) {
             if (auth()->check()) {
                 $user = auth()->user();
             } else {
@@ -134,21 +134,21 @@ trait Favoritable
 
         if ($this->favorites()
             ->where('user_id', $user->id)
-            ->where('isdeleted', 0)
-            ->exists()) {
+
+            ->exists()
+        ) {
 
             $unfavorite = $this->favorites()
                 ->where('user_id', '=', $user->id)
-                ->where('isdeleted',0)
+
                 ->where('favoritable_id', '=', $this->id)
                 ->update([
-                    'isdeleted' => 1,
                     'deleted_at' => now(),
                     'deleted_by' => $user->id,
                 ]);
 
 
-            if(!$unfavorite){
+            if (!$unfavorite) {
                 return false;
             }
 
@@ -160,7 +160,7 @@ trait Favoritable
 
     public function alarm($user = null)
     {
-        if($user == null){
+        if ($user == null) {
             if (auth()->check()) {
                 $user = auth()->user();
             } else {
@@ -172,8 +172,9 @@ trait Favoritable
 
         if ($this->favorites()
             ->where('user_id', $user->id)
-            ->where('isdeleted',0)
-            ->exists()) {
+
+            ->exists()
+        ) {
 
             $this->favorites()->update([
                 'alarm' => 1
@@ -188,7 +189,7 @@ trait Favoritable
 
             $favorite_save = $this->favorites()->save($favorite);
 
-            if(!$favorite_save){
+            if (!$favorite_save) {
                 return false;
             }
 
@@ -200,7 +201,7 @@ trait Favoritable
 
     public function unalarm($user = null)
     {
-        if($user == null){
+        if ($user == null) {
             if (auth()->check()) {
                 $user = auth()->user();
             } else {
@@ -212,19 +213,20 @@ trait Favoritable
 
         if ($this->favorites()
             ->where('user_id', $user->id)
-            ->where('isdeleted', 0)
-            ->exists()) {
+
+            ->exists()
+        ) {
 
             $unfavorite = $this->favorites()
                 ->where('user_id', $user->id)
-                ->where('isdeleted',0)
-                ->where('favoritable_id',$this->id)
+
+                ->where('favoritable_id', $this->id)
                 ->update([
                     'alarm' => 0,
                 ]);
 
 
-            if(!$unfavorite){
+            if (!$unfavorite) {
                 return false;
             }
 
